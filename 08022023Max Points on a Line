@@ -1,0 +1,121 @@
+149. Max Points on a Line
+Hard
+
+2623
+
+341
+
+Add to List
+
+Share
+Given an array of points where points[i] = [xi, yi] represents a point on the X-Y plane, return the maximum number of points that lie on the same straight line.
+
+ 
+
+Example 1:
+
+
+Input: points = [[1,1],[2,2],[3,3]]
+Output: 3
+Example 2:
+
+
+Input: points = [[1,1],[3,2],[5,3],[4,1],[2,3],[1,4]]
+Output: 4
+ 
+
+Constraints:
+
+1 <= points.length <= 300
+points[i].length == 2
+-104 <= xi, yi <= 104
+All the points are unique.
+
+class Solution {
+    public int maxPoints(int[][] points) {
+        int n = points.length;
+        if(n <= 2) return n; // 2 or less points can always form a line.
+        int ans = 2;
+        
+        for(int[] a : points){
+            //Map<Double, Integer> for storing (slope, no of times 2 points generate this slope.)
+            Map<Double, Integer> map = new HashMap<>();
+            for(int[] b : points){
+                if(a == b) continue; // dont measure slope for same points in plane.   
+                // if a is (x1, y1) and b is(x2, y2) then slope is (y2 - y1)/(x2 -x1)
+                // a (a0, a1) & b is (b0, b1)
+                double slope = 0;
+                if(b[0] - a[0] == 0) slope = Double.POSITIVE_INFINITY;
+                else slope = (b[1] -a[1]) / (double)(b[0] - a[0]);
+                //map.getOrDefault(slope, 0)+1 is adding 1 more point count for that slope if we already had that slope. 
+                // by default , 1 will be count of a new slope.
+                map.put(slope, map.getOrDefault(slope, 1)+1);
+                ans = Math.max(ans, map.get(slope));             
+            }
+        } 
+        //ans itself represnets max no of points forms a line 
+        return ans;
+    }
+}
+
+/*
+Approach and Explantation
+It does this by iterating through every combination of two points (i and j) in the input array of points and then checks every other point (k) to see if it is collinear with i and j.
+
+To determine if three points are collinear, the code calculates the slope between point i and point j, and then compares it to the slope between point i and point k. If the slopes are equal, then the three points are collinear.
+
+The slope between two points (x1, y1) and (x2, y2) is calculated as (y2 - y1) / (x2 - x1).Let suppose we have three points (x1, y1),(x2, y2) and (x3, y3) and compare the two slopes then expression is written in this formet(y2 - y1) * (x3 - x1) = (y3 - y1) * (x2 - x1) similarly In this code, this calculation is broken down into two separate parts: (points[j][1] - points[i][1]) * (points[k][0] - points[i][0]) and (points[k][1] - points[i][1]) * (points[j][0] - points[i][0]). The reason for this is to avoid a division by zero error in cases where the two points have the same x-coordinate.
+
+If the code determines that three points i, j, and k are collinear, it increments a temporary count variable temp. After checking every point k, the code compares temp to the current maximum number of collinear points found so far, ans, and updates ans if temp is larger.
+
+Finally, the code returns the maximum number of collinear points, ans.
+TC =o(N^3)
+
+Code
+class Solution {
+    // This method returns the maximum number of points that lie on the same line
+    // given a set of points represented by the 2D array points
+    public int maxPoints(int[][] points) {
+        // n is the number of points in the array
+        int n = points.length;
+        
+        // If there are 0 or 1 points, there is at most one line that can be formed
+        // (i.e., the line formed by the single point, or no line if there are no points)
+        if(n <= 2) return n;
+        
+        // Initialize the maximum number of points on a line to 2, since there must be at least 2 points to form a line
+        int ans = 2;
+        
+        // Iterate through all pairs of points
+        for(int i = 0 ;i < n; i++){
+            for(int j = i+1; j < n ; j++){
+                // temp is the number of points on the line formed by point i and point j
+                int temp = 2;
+                // Check if any other points are on the same line as point i and point j
+                for(int k = j+1 ; k<n ; k++ ){                   
+                    // Check if point k is on the same line as point i and point j
+                    // This is done by checking if the slope between point i and point k is equal to the slope between point i and point j
+                    int x = (points[j][1] - points[i][1]) * (points[k][0] - points[i][0]);
+                    int y = (points[k][1] - points[i][1]) * (points[j][0] - points[i][0]);
+                    if(x == y){
+                        // If the slopes are equal, point k is on the same line as point i and point j
+                        temp++;
+                    }
+                }
+                // Update the maximum number of points on a line if necessary
+                if(temp > ans){
+                    ans = temp;
+                }
+            }
+        }   
+        // Return the maximum number of points on a line
+        return ans;
+    }
+}
+
+
+This is a very mathematically elegant solution, but sadly its time complexity is $$O(n^3)$$. If you compare pairs of points (and not triplets) by calculating the line equation (m and b) in between them you can reach a time complexity of only $$O(n^2)$$.
+
+Map Soluntion - TC =O(n^2)
+
+*/
